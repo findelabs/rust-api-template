@@ -1,7 +1,8 @@
 use axum::{
     handler::Handler,
     routing::{get, post},
-    AddExtensionLayer, Router,
+    Router,
+    extract::Extension
 };
 use axum_extra::middleware;
 use chrono::Local;
@@ -94,7 +95,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .merge(standard)
         .layer(TraceLayer::new_for_http())
         .route_layer(middleware::from_fn(track_metrics))
-        .layer(AddExtensionLayer::new(state));
+        .layer(Extension(state));
 
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(handler_404.into_service());
