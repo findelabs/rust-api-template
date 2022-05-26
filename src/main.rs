@@ -2,11 +2,11 @@ use axum::{
     handler::Handler,
     routing::{get, post},
     Router,
+    middleware,
     extract::Extension
 };
-use axum_extra::middleware;
 use chrono::Local;
-use clap::{crate_name, crate_version, App, Arg};
+use clap::{crate_name, crate_version, Command, Arg};
 use env_logger::{Builder, Target};
 use log::LevelFilter;
 use std::future::ready;
@@ -27,13 +27,13 @@ use state::State;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let opts = App::new(crate_name!())
+    let opts = Command::new(crate_name!())
         .version(crate_version!())
         .author("")
         .about(crate_name!())
         .arg(
-            Arg::with_name("port")
-                .short("p")
+            Arg::new("port")
+                .short('p')
                 .long("port")
                 .help("Set port to listen on")
                 .env("RUST_API_LISTEN_PORT")
@@ -41,8 +41,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("timeout")
-                .short("t")
+            Arg::new("timeout")
+                .short('t')
                 .long("timeout")
                 .help("Set default global timeout")
                 .default_value("60")

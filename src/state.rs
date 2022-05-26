@@ -13,7 +13,7 @@ pub struct State {
 }
 
 impl State {
-    pub async fn new(opts: ArgMatches<'_>) -> BoxResult<Self> {
+    pub async fn new(opts: ArgMatches) -> BoxResult<Self> {
         // Set timeout
         let timeout: u64 = opts
             .value_of("timeout")
