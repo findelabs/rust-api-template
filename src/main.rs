@@ -22,7 +22,6 @@ mod state;
 
 use crate::metrics::{setup_metrics_recorder, track_metrics};
 use handlers::{echo, handler_404, health, help, root};
-use https::create_https_client;
 use state::State;
 
 #[tokio::main]

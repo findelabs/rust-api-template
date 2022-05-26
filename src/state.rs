@@ -1,8 +1,7 @@
-use crate::https::HttpsClient;
 use clap::ArgMatches;
 use std::error::Error;
 
-use crate::create_https_client;
+use crate::https::{HttpsClient, ClientBuilder};
 //use crate::error::Error as RestError;
 
 type BoxResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
@@ -24,7 +23,7 @@ impl State {
                 60
             });
 
-        let client = create_https_client(timeout)?;
+        let client = ClientBuilder::new().timeout(timeout).build()?;
 
         Ok(State {
             client,
