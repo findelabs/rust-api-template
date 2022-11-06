@@ -8,6 +8,10 @@ pub fn setup_metrics_recorder() -> PrometheusHandle {
     ];
 
     PrometheusBuilder::new()
+        .idle_timeout(
+            MetricKindMask::COUNTER | MetricKindMask::GAUGE,
+            Some(Duration::from_secs(10)),
+        )
         .set_buckets_for_metric(
             Matcher::Full("http_requests_duration_seconds".to_string()),
             EXPONENTIAL_SECONDS,
