@@ -1,12 +1,11 @@
 use axum::{
-    handler::Handler,
     routing::{get, post},
     Router,
     middleware,
     extract::Extension
 };
 use chrono::Local;
-use clap::{crate_name, crate_version, Command, Arg};
+use clap::Parser;
 use env_logger::{Builder, Target};
 use log::LevelFilter;
 use std::future::ready;
@@ -24,31 +23,22 @@ use crate::metrics::{setup_metrics_recorder, track_metrics};
 use handlers::{echo, handler_404, health, help, root};
 use state::State;
 
+#[derive(Parser, Debug, Clone)]
+#[command(author, version, about, long_about = None)]
+pub struct Args {
+   /// Port to listen on
+   #[arg(short, long, default_value_t = 8080, env = "API_PORT")]
+   port: u16,
+
+   /// Default global timeout
+   #[arg(short, long, default_value_t = 60, env = "API_TIMEOUT")]
+   timeout: u64,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let opts = Command::new(crate_name!())
-        .version(crate_version!())
-        .author("")
-        .about(crate_name!())
-        .arg(
-            Arg::new("port")
-                .short('p')
-                .long("port")
-                .help("Set port to listen on")
-                .env("RUST_API_LISTEN_PORT")
-                .default_value("8080")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("timeout")
-                .short('t')
-                .long("timeout")
-                .help("Set default global timeout")
-                .default_value("60")
-                .env("RUST_API_TIMEOUT")
-                .takes_value(true),
-        )
-        .get_matches();
+
+    let args = Args::parse();
 
     // Initialize log Builder
     Builder::new()
@@ -66,14 +56,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .parse_default_env()
         .init();
 
-    // Set port
-    let port: u16 = opts.value_of("port").unwrap().parse().unwrap_or_else(|_| {
-        eprintln!("specified port isn't in a valid range, setting to 8080");
-        8080
-    });
-
     // Create state for axum
-    let state = State::new(opts.clone()).await?;
+    let state = State::new(args.clone()).await?;
 
     // Create prometheus handle
     let recorder_handle = setup_metrics_recorder();
@@ -94,12 +78,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .merge(standard)
         .layer(TraceLayer::new_for_http())
         .route_layer(middleware::from_fn(track_metrics))
+        .fallback(handler_404)
         .layer(Extension(state));
 
-    // add a fallback service for handling routes to unknown paths
-    let app = app.fallback(handler_404.into_service());
-
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    let addr = SocketAddr::from(([0, 0, 0, 0], args.port as u16));
     log::info!("Listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
