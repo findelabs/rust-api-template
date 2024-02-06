@@ -1,4 +1,4 @@
-from rust:bookworm as builder
+FROM rust:bookworm as builder
 
 RUN mkdir /app 
 RUN mkdir /app/bin 
