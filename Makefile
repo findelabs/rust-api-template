@@ -10,6 +10,9 @@ depends:
 build:
 	@cargo build
 
+clean:
+	@cargo clean
+
 run: 
 	RUST_LOG=info cargo run --release -- --port 8080
 
