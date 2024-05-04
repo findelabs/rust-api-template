@@ -12,6 +12,8 @@ use std::future::ready;
 use std::io::Write;
 use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
+use tokio::net::TcpListener;
+use tower::ServiceBuilder;
 
 mod error;
 mod handlers;
@@ -76,16 +78,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let app = Router::new()
         .merge(base)
         .merge(standard)
-        .layer(TraceLayer::new_for_http())
+		.layer(
+            ServiceBuilder::new()
+                .layer(TraceLayer::new_for_http())
+        )
         .route_layer(middleware::from_fn(track_metrics))
         .fallback(handler_404)
         .layer(Extension(state));
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], args.port as u16));
+//    let addr = SocketAddr::from(([0, 0, 0, 0], args.port as u16));
+//    log::info!("Listening on {}", addr);
+//    axum::Server::bind(&addr)
+//        .serve(app.into_make_service())
+//        .await?;
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], args.port));
+    let listener = TcpListener::bind(addr).await.unwrap();
+
     log::info!("Listening on {}", addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await?;
+    axum::serve(listener, app).await?;
 
     Ok(())
 }

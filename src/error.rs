@@ -28,10 +28,16 @@ impl fmt::Display for Error {
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         let payload = self.to_string();
-        let body = body::boxed(body::Full::from(payload));
+        let body = axum::body::Body::new(payload);
+
+		let status_code = match &self {
+            Error::Unauthorized | Error::Forbidden => StatusCode::UNAUTHORIZED,
+            Error::NotFound => StatusCode::NOT_FOUND,
+//            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        };
 
         Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .status(status_code)
             .body(body)
             .unwrap()
     }

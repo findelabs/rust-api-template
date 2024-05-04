@@ -1,8 +1,8 @@
-use axum::{http::Request, middleware::Next, response::IntoResponse};
-use metrics_exporter_prometheus::{Matcher, PrometheusBuilder, PrometheusHandle};
-use std::time::Instant;
-use metrics_util::MetricKindMask;
+use axum::{extract::Request, middleware::Next, response::Response};
 use core::time::Duration;
+use metrics_exporter_prometheus::{Matcher, PrometheusBuilder, PrometheusHandle};
+use metrics_util::MetricKindMask;
+use std::time::Instant;
 
 pub fn setup_metrics_recorder() -> PrometheusHandle {
     const EXPONENTIAL_SECONDS: &[f64] = &[
@@ -23,7 +23,7 @@ pub fn setup_metrics_recorder() -> PrometheusHandle {
         .unwrap()
 }
 
-pub async fn track_metrics<B>(req: Request<B>, next: Next<B>) -> impl IntoResponse {
+pub async fn track_metrics(req: Request, next: Next) -> Response {
     let start = Instant::now();
     let path = req.uri().path().to_owned();
     let method = req.method().clone();
