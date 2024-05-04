@@ -20,6 +20,7 @@ mod handlers;
 mod https;
 mod metrics;
 mod state;
+mod tracing;
 
 use crate::metrics::{setup_metrics_recorder, track_metrics};
 use handlers::{echo, handler_404, health, help, root};
