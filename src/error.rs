@@ -13,16 +13,16 @@ pub enum Error {
 	#[error("{{\"error\": \"Cannot get config: Not found\"}}")]
 	NotFound,
 
-	#[error(transparent)]
+    #[error(transparent)]
     OpenTelemetry {
         #[from]
-		source: opentelemetry::trace::TraceError
+        source: opentelemetry::trace::TraceError
     },
-	#[error(transparent)]
-	TracingErr {
-		#[from]
-		source: tracing::dispatcher::SetGlobalDefaultError
-	}
+    #[error(transparent)]
+    TracingErr {
+        #[from]
+        source: tracing::dispatcher::SetGlobalDefaultError
+    }
 }
 
 impl IntoResponse for Error {
