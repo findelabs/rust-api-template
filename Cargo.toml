@@ -4,6 +4,10 @@ version = "0.0.3"
 description = "Rust API Template"
 edition = "2021"
 
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
 [dependencies]
 axum = "0.8"
 axum-extra = "0.1"
