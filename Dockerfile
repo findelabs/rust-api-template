@@ -1,19 +1,24 @@
-FROM rust:bookworm as builder
+FROM rust:1.85.1 as builder
 
-RUN mkdir /app 
-RUN mkdir /app/bin 
+RUN mkdir /app
+RUN mkdir /app/bin
 
-COPY src /app/src/
-COPY Cargo.toml /app
+WORKDIR /app
+COPY Cargo.toml .
+COPY Cargo.lock .
+COPY src ./src
 
 RUN apt-get update && apt-get install -y libssl-dev pkg-config make
-RUN cargo install --path /app --root /app
-RUN strip app/bin/proxima
+RUN cargo build --release
+RUN cp ./target/release/main ./bin/main
+RUN strip ./bin/main
 
 FROM debian:bookworm-slim
 WORKDIR /app
-RUN apt-get update && apt-get install -y ca-certificates openssl
-COPY --from=builder /app/bin/ ./
+RUN apt-get update && apt-get install -y ca-certificates openssl curl wget
 
-ENTRYPOINT ["/app/rust-api-template"]
+COPY --from=builder /app/bin/ ./
+COPY entrypoint.sh .
+
 EXPOSE 8080
+ENTRYPOINT ["/app/entrypoint.sh"]

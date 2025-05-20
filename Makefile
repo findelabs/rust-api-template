@@ -10,6 +10,11 @@ depends:
 build:
 	@cargo build
 
+update:
+	@cargo update
+
+rebuild: update build
+
 clean:
 	@cargo clean
 

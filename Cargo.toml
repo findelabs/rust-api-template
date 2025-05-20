@@ -1,11 +1,11 @@
 [package]
 name = "rust-api-template"
-version = "0.0.2"
+version = "0.0.3"
 description = "Rust API Template"
 edition = "2021"
 
 [dependencies]
-axum = "0.7"
+axum = "0.8"
 axum-extra = "0.1"
 # base64 = "0.13"
 chrono = { version = "0.4", features = ["serde"] }
